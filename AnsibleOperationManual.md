@@ -106,9 +106,14 @@
 - 실행 결과는 다음과 같이 지정된 메시지 내용만 출력한다.  
 ![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/70f6b1b2-addf-4a66-b55b-00f4f5d062e5)
 - 가독성을 높여서 사용할 수 있으나, 매번 세세히 정의해야 하는 번거로움이 있다.
+#### 2-7.3 그 외 가장 깔끔한 디버깅 메시지 작성
+- 디버깅 메시지 작성 시, 아래와 같이 register 모듈에 등록된 객체인 stdout_lines를 활용하는 방법이 존재한다. 소스는 아래와 같이 debug 내에 속하는 var에 register모듈변수.stdout_lines와 같이 작성한다.  
+![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/e8f846c0-2bcc-4f70-9877-ba6141e9363f)
+- 실행 결과로는 아래와 같은 OS 명령의 결과를 더 직관적으로 반환할 수 있으므로 해당 방식이 더 적절한 것으로 보인다.
+![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/1564e328-8c77-4daa-a6ed-9c40a877ff70)
 
 ### 2-8. OS 명령어
-- Linux OS 명령어 실행 결과를 모든 관리 대상 서버에서 일제히 확인하고 싶을 때가 있다. 이 때Ansible을 사용하면 아주 편리하다.
+- Linux OS 명령어 실행 결과를 모든 관리 대상 서버에서 일제히 확인하고 싶을 때가 있다. 이 때 Ansible을 사용하면 아주 편리하다.
 - yaml 파일을 다음과 같이 작성한다.  
 ![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/e18170c7-3521-468e-82ed-d5cf99fcf868)
 - 사용 방법은 아래 사진과 같이 –e 옵션을 사용하여 command 변수에 값을 부여한다.  
@@ -131,6 +136,15 @@
 - 위 사진의 결과의 경우 암호화 해시를 반드시 넣을 것을 권장하는 경고 문구인데, 무시하고 그냥 실행하면 패스워드 변경 후 로그인이 안 된다.(서버에 물리적 접근으로 로그인하는 것은 가능)
 - 계정 패스워드를 변경할 수 있는 Playbook은 아래와 같이 작성한다.  
 ![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/06a7b4d9-0e26-48d7-80cf-985946db3989)
+
+### 2-10. 블록 재구동
+- 블록 재구동 명령을 위해서는 OS 버전별로 System Daemon을 어떤 것을 사용하고 있는지를 이해해야 한다.
+- Redhat 계열 리눅스인 CentOS의 경우 CentOS7.0을 기점으로 System Daemon이 inittab에서 systemd로 교체되면서 데몬 관리 명령어도 달라진다.
+- CentOS 6.X 이하의 OS들은 inittab 기반으로 service 명령을, CentOS 7.x 이상의 OS는 systemd 기반으로 systemctl 명령을 사용하여 블록을 관리한다.
+- 그래서 블록 버전별로 yaml을 다르게 작성하는 방법과, 조건문을 이용하여 hosts의 OS
+
+
+
 
 # 3. 기타 참고 사항
 ### 3-1. 타겟팅 서버 그룹핑 원칙 및 설정 방법
