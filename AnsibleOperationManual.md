@@ -141,7 +141,8 @@
 - 블록 재구동 명령을 위해서는 OS 버전별로 System Daemon을 어떤 것을 사용하고 있는지를 이해해야 한다.
 - Redhat 계열 리눅스인 CentOS의 경우 CentOS7.0을 기점으로 System Daemon이 inittab에서 systemd로 교체되면서 데몬 관리 명령어도 달라진다.
 - CentOS 6.X 이하의 OS들은 inittab 기반으로 service 명령을, CentOS 7.x 이상의 OS는 systemd 기반으로 systemctl 명령을 사용하여 블록을 관리한다.
-- 그래서 블록 버전별로 yaml을 다르게 작성하는 방법과, 조건문을 이용하여 hosts의 OS
+- 그래서 블록 버전별로 yaml을 다르게 작성하는 방법과, 조건문을 이용하여 hosts의 OS버전에 따라 service 모듈 또는 systemctl 모듈 사용을 다르게 동작하게 할 수도 있다.
+- 현재는 OS버전별로 다르게 동작하도록 service 모듈과 systemctl 모듈에 해당하는 각각의 yaml 파일을 만들어 둔 상태이다.
 
 
 
