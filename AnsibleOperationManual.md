@@ -136,6 +136,8 @@
 - 위 사진의 결과의 경우 암호화 해시를 반드시 넣을 것을 권장하는 경고 문구인데, 무시하고 그냥 실행하면 패스워드 변경 후 로그인이 안 된다.(서버에 물리적 접근으로 로그인하는 것은 가능)
 - 계정 패스워드를 변경할 수 있는 Playbook은 아래와 같이 작성한다.  
 ![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/06a7b4d9-0e26-48d7-80cf-985946db3989)
+- 2023년 7월 12일자에 확인된 특이사항은 바꿀 패스워드를 아래와 같이 입력하면, CentOS7.x 버전 아래의 OS들에서는 특수문자가 처리되지 않는다.  
+![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/3179bb6b-5644-4654-870b-a57a4235fe5d)
 
 ### 2-10. 블록 재구동
 - 블록 재구동 명령을 위해서는 OS 버전별로 System Daemon을 어떤 것을 사용하고 있는지를 이해해야 한다.
@@ -145,6 +147,10 @@
 - 현재는 OS버전별로 다르게 동작하도록 service 모듈과 systemctl 모듈에 해당하는 각각의 yaml 파일을 만들어 둔 상태이다.
 - 블록 관련 작업에 service 또는 systemctl 모듈을 사용하는 이유는 Ansible의 특성인 멱등성을 보장하기 위해서이다.
 - 예를 들어, 이미 블록이 start되어 있는 상태에서 start 명령을 하달 했을 때 결과값이 Changed가 Return 된다면 그것은 멱등성을 보장하기 어려운 상태가 되므로 모듈을 사용하면 이를 방지할 수 있다.
+- systemctl 모듈을 활용한 블록 재구동 Playbook은 아래 예시와 같이 작성한다.  
+![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/4a3964c2-9e17-4aa1-b85b-3ba938da2ba6)
+- 실행은 아래와 같이 blockName 변수에 블록 이름 값을 부여한다.  
+![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/6650104c-33b9-4882-90fc-fc23e68e53f2)
 
 
 
@@ -161,4 +167,8 @@
 ![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/eb077dc5-6a61-48b1-a214-3df0f55348ad)
 - /etc/hosts 파일에서 관리 대상 IP의 이름을 지정할 때 어떤 서버인지 구분하기 쉽게 이름을 명확하게 지어주는 것도 관리 용이성을 추구할 수 있는 방법 중 하나이다.
 - 투입된 프로젝트 단위로 Inventory 파일을 분리해 작성하는 것 또한 좋은 방법이 될 수 있다.
+
+### 3-2. 특이사항
+- IP-PBX 제품군을 대상으로 Ansible Control을 시도하였을 때, 제품 관련 블록을 재구동하면 iptables가 자동으로 재생성되는 현상 때문에 Task의 Reslut 값을 Return 받지 못하는 현상이 발생한다.
+- 해당 내용은 IP-PBX 제품군의 GUI에서 보안 관련 작업을 실시하여 해결할 수 있다.
 
