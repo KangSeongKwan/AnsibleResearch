@@ -1,0 +1,14 @@
+---
+- name: Block restart with Systemctl
+  hosts: xip43
+  tasks:
+    - name: Restart Inputted Blocks with Systemd module
+      systemd:
+        name: "{{ blockName }}"
+        state: restarted  
+      register: runBlockTask
+          
+    - name: Print Command Run
+      debug:
+        var: runBlockTask.name
+...

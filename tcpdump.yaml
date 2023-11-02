@@ -1,0 +1,28 @@
+#ansible-playbook tcpdump.yaml
+
+---
+-  name: tcpdump Packet capture
+   hosts : xipServers
+   become: yes
+   become_method: sudo
+   gather_facts: yes
+   vars:
+     cap_file: packet_capture_{{ ansible_hostname }}_{{ ansible_date_time['date'] }}_{{ ansible_date_time['time'] }}_{{ ansible_date_time['epoch'] }}.cap
+
+   tasks:
+   - name: start tcpdump
+     command: /usr/sbin/tcpdump -i any -s 0 -w /tmp/{{ cap_file }}
+     async: 600
+     poll: 0
+
+   - pause: minutes=10 prompt="pause for 600 seconds or press Ctrl + c then c to continue"
+
+   - name: kill tcpdump
+     command: /usr/bin/pkill tcpdump
+
+   - name: fetch packet file to controller server
+     fetch: src=/tmp/{{ cap_file }} dest=/tmp/ flat=yes
+
+   - name: remove files from target server
+     file: path=/tmp/{{ cap_file }} state=absent
+...

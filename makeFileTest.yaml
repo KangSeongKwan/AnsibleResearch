@@ -1,0 +1,13 @@
+---
+  - name: "Make File Test for idempotent"
+    hosts: xip43
+    
+    tasks:
+      - name: File make
+        file:
+          path: /home/testFile.txt
+          state: touch
+          owner: root
+          group: root
+          mode: 0777
+...

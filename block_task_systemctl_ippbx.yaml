@@ -1,0 +1,14 @@
+---
+- name: Block restart with Systemctl
+  hosts: xip43
+  tasks:
+    - name: start Inputted Blocks
+      systemd:
+        # blockName 변수값을 반드시 ipageon으로 지정해야 합니다.
+        name: "{{ blockName }}"
+        state: restarted
+
+    - name: remove iptables rules all tables and chains
+      ansible.builtin.iptables:
+        flush: yes
+...

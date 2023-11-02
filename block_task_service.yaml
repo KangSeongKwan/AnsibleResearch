@@ -1,0 +1,14 @@
+---
+- name: Block restart with service
+  hosts: xip40, xip3X, xip2X
+  tasks:
+    - name: Restart Inputted Blocks with Service module
+      service:
+        name: "{{ blockName }}"
+        state: restarted
+      register: runBlockTask
+
+    - name: Print Command Run
+      debug:
+        var: runBlockTask.name
+...

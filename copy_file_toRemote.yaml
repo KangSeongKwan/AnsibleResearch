@@ -1,0 +1,15 @@
+---
+- hosts: all
+  remote_user: root
+  gather_facts: yes
+  tasks:
+    - name: store file to remote server
+      copy:
+        src: "{{ src }}"
+        dest: "{{ dest }}"
+      register: storeFile
+
+    - name: Task Result Print      
+      debug:
+        var: storeFile.stdout_lines
+...

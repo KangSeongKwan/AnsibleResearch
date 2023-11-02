@@ -1,0 +1,10 @@
+---
+- hosts: "{{ targetServer }}"
+  remote_user: root
+  tasks:
+    - name: fetch file from remote server
+      fetch:
+        src: "{{ src }}"
+        dest: "{{ dest }}"
+        flat: yes # 설정하지 않으면 dest 아래에 src 경로 전체가 복사됨
+...

@@ -1,0 +1,16 @@
+# ansible-playbook do_osCommand.yml -e "command='ls -ltr'"
+# ansible-playbook do_osCommand.yml -e "command='fdisk -l'"
+
+---
+-  name: Run OS Command
+   hosts: xipServers
+   tasks:
+   - name: Run Command
+     shell: | 
+       {{ command }}  
+     register: runProcess
+
+   - name: Print Command Run  
+     debug:
+       var: runProcess.stdout_lines
+...

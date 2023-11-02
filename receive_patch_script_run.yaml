@@ -1,0 +1,36 @@
+--- 
+- name: "Download patch with sftp" 
+  hosts: xipServers
+  remote_user: root
+  vars: 
+     local_path: /root/script
+     remote_path: /root/script
+  tasks: 
+    - name: Create a script directory if it does not exist
+      become: yes
+      file:
+        owner: root
+        group: root
+        path: /root/script
+        state: directory
+        mode: 0777
+  
+    - name: "Script Send" 
+      copy: 
+        src: "{{ local_path }}/down_patch_sftp.sh" 
+        dest: "{{ remote_path }}/down_patch_sftp.sh" 
+        owner: root
+        group: root
+        mode: '0755' 
+
+    - name: "Script run" 
+      ignore_errors: yes 
+      shell: 
+        cmd: | 
+          {{ remote_path }}/down_patch_sftp.sh
+      register: get_patch  
+
+    - name: "Printe Script Run Result"  
+      debug:  
+        var: get_patch  
+...
