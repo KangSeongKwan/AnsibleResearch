@@ -1,4 +1,4 @@
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/367ace4d-71ea-4a54-9921-4f462d7ee364)1. Ansible 활용 방안
+# 1. Ansible 활용 방안
 - Ansible을 활용하면 다수의 서버에 대해 일정한 작업을 자동화하고, 특정 패치에 관한 배포를 자동화 할 수 있는 등 다양한 활용 사례가 있다.
 - 삼성 SDS에서 작성한 Ansible 활용 사례를 보면, AWS와 같이 보안이 취약해질 수 있는
 Cloud 환경에서 외부 위협을 방어하는데 사용할 수 있다고 한다.
@@ -7,11 +7,10 @@ Cloud 환경에서 외부 위협을 방어하는데 사용할 수 있다고 한�
 ![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/cf062cdb-970f-4590-bb3f-197fd7d1eeac)
 
 
-2. Ansible 운용
-2-1. 운용 전 추가 환경설정
+# 2. Ansible 운용
+### 2-1. 운용 전 추가 환경설정
 - Ansible 설치 매뉴얼 문서의 절차대로 설치가 완료되었다면, 일종의 환경 설정을 진행해야 한다. - 우선 Ansible이 제대로 동작하기 위해서는 Controller Server, Managed Node에 ssh-keygen 명령어를 입력하여 둘 다 ssh key를 생성하고 ssh-copy-id 명령어로 생성한 키를 등록해야 한다.
 ![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/f5813be2-f56f-436d-af66-dd941b98699b)
-
 - key 생성 시 위 화면처럼 출력되지 않으면 ssh-copy-id를 통해 key를 자동으로 등록할 수 없다.(보통 OS버전이 낮으면 많이 발생한다.)
 - ssh key 등록에 성공하면 PW를 물어보지 않고 ssh로 로그인 할 수 있음을 확인할 수 있다.
 ![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/e55a1cec-dedc-40f0-8389-e4964a2aacbb)
