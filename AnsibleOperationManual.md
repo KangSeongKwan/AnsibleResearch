@@ -1,174 +1,215 @@
-# 1. Ansible 활용 방안
+![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/367ace4d-71ea-4a54-9921-4f462d7ee364)1. Ansible 활용 방안
 - Ansible을 활용하면 다수의 서버에 대해 일정한 작업을 자동화하고, 특정 패치에 관한 배포를 자동화 할 수 있는 등 다양한 활용 사례가 있다.
-- 삼성 SDS에서 작성한 Ansible 활용 사례를 보면, AWS와 같이 보안이 취약해질 수 있는 Cloud 환경에서 외부 위협을 방어하는데 사용할 수 있다고 한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/f87bdeb9-d082-41ee-b9ee-554dc25c9b32)
-- 아래 글은 SDS 기술문서에서 제안한 Cloud 환경에서 Ansible을 이용해서 보안을 강화할 수 있는 가장 간단한 작업의 사례이다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/85ed5081-9943-4f48-bf2a-748eac839bcc)
+- 삼성 SDS에서 작성한 Ansible 활용 사례를 보면, AWS와 같이 보안이 취약해질 수 있는
+Cloud 환경에서 외부 위협을 방어하는데 사용할 수 있다고 한다.
+![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/c6c8f5f2-632e-406f-9c0c-7896c8ddfd54)
+- 아래 글은 SDS 기술문서에서 제안한 Cloud 환경에서 Ansible을 이용해서 보안을 강화할 수 있는 가장 간단한 작업의 사례이다.
+![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/cf062cdb-970f-4590-bb3f-197fd7d1eeac)
 
-# 2. Ansible 운용
-### 2-1. 운용 전 알아야 할 것
-- 이 사례에서는 관리 대상의 서버에 존재하는 Database 파일(sql파일)을 Controller 서버에 백업하는 방법에 대해서 다루었다.
-- 우선, 다루기 전에 Controller Server에 Ansible을 설치한 후 어떤 것이 존재하는지 알아야 한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/c44d0457-5522-44d7-9d43-f9f104137a06)
-- 위와 같이 ansible 설정파일이 들어 있는 /etc/ansible에 진입하면 다음과 같이 roles, ansible.cfg, hosts와 그 외의 것이 들어있다.
-- 이 중 설치 직후 확인 시 기본으로 탑재되어 있는 것은 roles 디렉터리, ansible.cfg 설정 파일, hosts 설정 파일이다.
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/185d97d1-3414-41b1-a946-7b464913de0c)
-- Ansible 설치 매뉴얼 문서의 절차대로 설치가 완료되었다면, 일종의 환경 설정을 진행해야 한다. 
-- Controller Server, Managed Node에 ssh-keygen 명령어를 입력하여 둘 다 ssh key를 생성하고 ssh-copy-id 명령어로 생성한 키를 등록해야 한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/9b270dec-0b65-4265-a09c-a398e6d92465)
+
+2. Ansible 운용
+2-1. 운용 전 추가 환경설정
+- Ansible 설치 매뉴얼 문서의 절차대로 설치가 완료되었다면, 일종의 환경 설정을 진행해야 한다. - 우선 Ansible이 제대로 동작하기 위해서는 Controller Server, Managed Node에 ssh-keygen 명령어를 입력하여 둘 다 ssh key를 생성하고 ssh-copy-id 명령어로 생성한 키를 등록해야 한다.
+![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/f5813be2-f56f-436d-af66-dd941b98699b)
+
 - key 생성 시 위 화면처럼 출력되지 않으면 ssh-copy-id를 통해 key를 자동으로 등록할 수 없다.(보통 OS버전이 낮으면 많이 발생한다.)
-- ssh key 등록에 성공하면 PW를 물어보지 않고 ssh로 로그인 할 수 있음을 확인할 수 있다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/54ba818b-903b-4769-b1ef-4e2b9892c7a5)
-- 키 생성 후 자동 등록이 되지 않는다면 대상 서버 authorized_key 파일에 직접 등록해야 한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/445c93ce-f39c-4d7c-bc97-7184f55bfeb2)
-- ssh key를 직접 등록하는 방법은 별도의 외부 문서를 참고하기 바란다.
+- ssh key 등록에 성공하면 PW를 물어보지 않고 ssh로 로그인 할 수 있음을 확인할 수 있다.
+![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/e55a1cec-dedc-40f0-8389-e4964a2aacbb)
+- 키 생성 후 자동 등록이 되지 않는다면 대상 서버 authorized_key 파일에 직접 등록해야 한다.
+![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/ba1a9882-6789-463f-a0f4-c925b9f1596d)
+- ssh key를 직접 등록하는 방법은 별도의 외부 문서 참고
 - 여기까지 완료해야 본격적으로 Ansible을 운용할 수 있다.
 
-### 2-2. Ansible Inventory 설정
+
+2-2. Ansible Inventory 설정
 - 이번 절부터 진행하는 작업은 모두 Controller Server에서 하는 작업에 해당한다.
-- Inventory는 관리 대상의 목록을 의미한다고 했다. 이 목록은 각각의 개별 노드가 될 수 있고, 여러 노드를 비슷한 성질에 따라 묶은 그룹이 될 수가 있다.
-- 이를 사용하려면 그 전에 /etc/hosts 파일에 alias 등을 등록해야 IP주소가 아닌 alias를 지정해서 편하게 유지보수 할 수 있다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/8cc93820-d4cd-44fe-9116-93123042a821)
-- network servicer restart 후 /etc/ansible/hosts 또는 별도의 ini파일에 관리대상 노드를 등록한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/a282cd37-6a2e-4bc2-afc3-21d59e9203ea)
-- 별도의 Inventory 파일을 사용하고 싶다면 다음과 같이 /etc/ansible/ansible.cfg를 수정해서 Default Inventory를 등록하면 명령어의 길이를 줄일 수 있다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/a0f5f060-1baf-48fa-b806-256418045fd9)
-
-### 2-3. yaml 파일 작성
-- 2-1.의 인벤토리 설정 이후 yaml 파일을 작성해야 하는데(yml이라고도 함) 이를 Playbook을 작성한다고 한다.
-- Playbook을 작성하고 해당 파일을 실행하면 hosts 키워드에 지정된 실행 대상에 대해서 tasks에 지정된 작업을 실행하게 된다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/8b91556a-af3b-4ad2-b66d-1c7131747320)
-- yaml 작성은 간격 준수도 엄격히 해야 하고 디버깅이 매우 까다롭다.
-- name에 작업 이름, hosts에 해당 Playbook을 실행할 호스트 이름, tasks에 실행할 작업을 명시한다.
-- 이때 ansible에서 제공해주는 모듈들을 사용할 수 있는데, 내용이 방대하므로 필요한 모듈이 있을 때 마다 구글링 또는 공식 문서를 참고하는 것을 권장한다.
-
-### 2-4. ansible 실행
-- Playbook에 저장된 작업을 실행하고 싶다면 Controller Server에서 anisble-playbook [playbook 이름]을 명시해준 후 명령어를 실행하면 된다.
-- 이때 roles를 지정해 여러 Playbook을 동시에 실행할 수 있는데, 이는 추후에 내용을 추가할 수 있도록 하겠음.
-- 실행 예시는 아래와 같다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/e4421b04-e954-4441-8b45-33d184ec0283)
-- 이는 정상적인 실행이 아닌데, n2 관리 대상의 Python 버전이 2.6 미만이기 때문에 발생한다.
-- 정상 실행 내용은 다음과 같다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/bcad8480-b792-47e8-8f6e-8a414c21df08)
-- 또한 대상 서버에 들어있던 db백업 파일이 Controller Server에 정상적으로 들어가 있는 것을 확인할 수 있다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/e9256f85-4d4d-4802-9ae9-dc4277ee20a2)
-- 실행 시 주의 해야 할 것이 있는데 anisble-playbook 명령 실행 시 /etc/ansible/ansible.cfg 설정 파일 내부에 inventory 값을 지정하지 않으면 default Inventory로 /etc/ansible/hosts 파일에 저장되어 있는 내용을 참조하게 된다.
-- 이를 피하려면 설정 파일 값을 수정하거나 –i 옵션을 사용하여 별도로 생성한 인벤토리 파일을 지정해주어야 한다. 아래는 인벤토리를 지정해서 실행하는 예시이다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/e30c3d79-521b-4720-99c3-ebc26447077c)
-- 참고로 아래 내용은 dbBackup을 실습하면서 사용했던 스크립트이다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/6a521fe8-805f-4ef3-93de-683dbc7f21a2)
-
-### 2-5. db_backup
-- sftp를 이용하는 방식이고 2-3.의 마지막 항목에 있는 스크립트를 실행하는 방식이다.
-- 구동 절차 : sftp 사용하여 백업 스크립트를 타겟 서버에 업로드 > 타겟 서버에서 스크립트 실행 > 컨트롤러 서버에 db 백업한 파일들 업로드
-- 2-3.에서 작성한 yaml 내용을 조금 더 보강하여 다음과 같이 작성한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/d634b640-277b-4477-9f40-7ce080fa1b0a)
-- 주의해야 할 점은 remote_path는 타겟 서버에서 만들어져 있는 디렉터리여야 한다.
-- remote_path 디렉터리가 생성되지 않았다면 다음과 같은 에러가 발생한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/a5da4777-ad37-46b7-ada4-8d2101905031)
-- 만약 타겟 서버에 /root/script 디렉터리가 없다면, ansible Ad-hoc 명령을 실행하여 디렉터리를 일괄적으로 생성하는 방법을 사용하면 된다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/6b48d3a1-4a58-489d-a885-b0d9dcbb4b19)
-- 그 다음 실행하면 다음과 같이 정상적으로 결과가 잘 나오는 것을 볼 수 있다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/a06129df-01e0-445a-a367-df859f862637)
-- 정상 백업이 완료되면 Controller Server에 다음과 같이 백업이 올라와 있는 것을 확인할 수 있다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/bfb5c7e4-ba79-4a55-9cca-50e490d6dbee)
-
-### 2-6. patch upload
-- 패치를 업로드 하는 방식은 dbBackup 스크립트의 방식과는 다르게 Controller Server의 특정 디렉터리에서 패치 파일을 get으로 받아오는 방식이다.
-- 스크립트는 아래와 같이 구현한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/75953eba-c0b9-4b04-ad66-1e8f0b21ef61)
-- 주의사항은 db_backup시와 마찬가지로 remote_path 디렉터리가 target 서버에 전부 생성되어 있어야 한다는 점이다.
-- db_backup시와 동일(디렉터리 이름만 다르게)한 Ad-hoc 명령을 사용하여 생성한다.
-- Controller Server에는 patch 파일을 수동으로 업로드 하면 된다.(FileZila 사용)
-- yaml 실행 전, patch 압축파일이 존재하는지 부터 확인한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/ddd33c5f-535d-4886-9bce-f987c15f5439)
-- yaml은 아래와 같이 작성해준다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/dee837d1-ede2-43cf-8b86-bfd4f52901bc)
-- 실행하면 다음과 같이 출력되어야 정상 동작한 것이다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/4b9f46e1-5387-498d-9f1f-cac064594a7a)
-- 타겟 서버 중 하나를 확인하여 patch파일이 잘 올라 갔는지 확인한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/74d3d5fb-2554-4c70-b08d-3658e075a0db)
+- Inventory는 관리 대상(Target Server 라고도 한다.)의 목록을 의미한다. 이 목록은 각각의 개별 노드가 될 수 있고, 여러 노드를 비슷한 성질에 따라 묶은 그룹이 될 수가 있다.
+- 그 전에 /etc/hosts 파일에 alias 등을 등록해야 IP주소가 아닌 alias를 hosts 변수로 지정해서 편하게 유지보수 할 수 있다.
  
-### 2-7. Debug Message
-- 위에서 보았던 실행 결과의 문제점은 어느 서버에서 어떤 파일을 전송 하였고 어떤 명령을 실행했는지 구체적인 것을 알 수 없다.
-- Playbook에서 debug 모듈을 사용하면 메시지를 표기할 수 있고, 표기 방식은 두 가지가 있다.
+- 앤서블 설치 시 기본으로 지정되는 파일인 /etc/ansible/hosts 파일 또는 별도의 ini파일을 생성하여 관리대상 노드를 등록한다.
+ 
+- 아래는 인벤토리 파일명을 –i 옵션으로 지정해서 실행하는 예시이다.
+- ansible –i [인벤토리 파일명.ini] [Target Server Node/Group명] –m [ping 모듈] 형태로 Test한 것이다.
+ 
+- 주의 할 점은 ansible/anisble-playbook 명령 실행 시 ansible.cfg 설정 파일의 inventory 값을 지정하지 않으면 default Inventory로 /etc/ansible/hosts 파일에 저장되어 있는 내용을 참조한다.
+- ansible.cfg 파일을 다음과 같이 수정하면 Inventory를 지정하면서 실행하지 않아도 된다..
+ 
 
-#### 2-7.1 register 모듈을 불러와 debug 모듈에 변수로 불러오는 방식
-- 하나의 task 단위에 register 모듈 사용하면 해당 task의 실행 과정을 확인할 수 있다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/951329b0-315c-4179-9e86-030befe4db7e)
-- 위는 db_backup yaml 파일의 일부를 발췌한 것이며, 수정 사항으로는 task에 register 모듈을 사용하여 결과 변수를 등록하고, debug 모듈에서 이를 사용하는 내용을 추가한 것이다.
-- 실행 결과는 다음과 같이 상세한 과정이 나온다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/80125f2f-8113-4e8d-bfe3-67e932be0d75)
-- 연구개발 과정에서의 논의 결과 두 방식 중에서 이 방식을 채택하는 것으로 결론이 나왔다.
-#### 2-7.2 debug 모듈의 msg 모듈을 사용하여 직접 메시지를 지정하는 방식
-- task에 register 모듈을 사용하는 방식이 아닌, debug 모듈 아래에 msg를 직접 작성하는 방식이다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/6a7d033b-e7c4-4ba3-983f-b94858d383e4)
-- 실행 결과는 다음과 같이 지정된 메시지 내용만 출력한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/70f6b1b2-addf-4a66-b55b-00f4f5d062e5)
-- 가독성을 높여서 사용할 수 있으나, 매번 세세히 정의해야 하는 번거로움이 있다.
-#### 2-7.3 그 외 가장 깔끔한 디버깅 메시지 작성
-- 디버깅 메시지 작성 시, 아래와 같이 register 모듈에 등록된 객체인 stdout_lines를 활용하는 방법이 존재한다. 소스는 아래와 같이 debug 내에 속하는 var에 register모듈변수.stdout_lines와 같이 작성한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/e8f846c0-2bcc-4f70-9877-ba6141e9363f)
-- 실행 결과로는 아래와 같은 OS 명령의 결과를 더 직관적으로 반환할 수 있으므로 해당 방식이 더 적절한 것으로 보인다.
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/1564e328-8c77-4daa-a6ed-9c40a877ff70)
-
-### 2-8. OS 명령어
-- Linux OS 명령어 실행 결과를 모든 관리 대상 서버에서 일제히 확인하고 싶을 때가 있다. 이 때 Ansible을 사용하면 아주 편리하다.
-- yaml 파일을 다음과 같이 작성한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/e18170c7-3521-468e-82ed-d5cf99fcf868)
-- 사용 방법은 아래 사진과 같이 –e 옵션을 사용하여 command 변수에 값을 부여한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/ee11ebe5-7c2f-4812-88cb-ec022908652f)
-- 이 때 명령어에 옵션 부여 또는 파이프를 사용하고자 하면 홑따옴표를 붙여 문자열로 인식 시켜야 값이 제대로 전달된다.(ex command=’df –h’, command=’ls –ltr’ 등등)
-- 위와 같이 yaml을 작성하는 것이 아닌 Ad-hoc 명령을 사용하는 방법은 아래와 같다.
-- 명령 쉘에서 ansible 명령을 입력하고, -m 옵션으로 shell 모듈을, -a 모듈로 shell 명령에 전달할 명령어를 입력한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/da54189c-f539-41c8-b1d2-7c47741c23b9)
-- 이를 활용하여 블록을 내릴 수도, 살릴 수도 있다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/474beac4-a35a-4584-b9a7-fd46d116405f)
-- 현재 에러가 발생한 타겟 서버들은 ipageon service가 아니라 xener service를 stop 시켜야 하기 때문에 발생하는 에러이기 때문에 무시해도 상관없다.
-- OS 명령어의 경우 상황마다 사용하고 싶은 명령어가 유동적으로 변화하는 특징을 지니고 있다.
-- 따라서 Playbook을 작성하여 실행할 명령을 매번 지정하는 것 보다는 Ad-Hoc 방식을 채택하는 것이 더 나은 결과물을 도출하는데 도움이 된다.
-
-### 2-9. 계정 패스워드 변경
-- 패스워드를 변경할 때에는 Ad-hoc 실행 보다는 Playbook 작성을 권장한다.
-- Ad-hoc 명령 방식으로 실행할 경우 아래 실행과 같이 지정해야 하는 옵션이 많다.
-- 유저 이름, 패스워드 상시 변경 여부, 패스워드 등을 지정해야 명령어가 동작한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/49443770-881c-4260-9655-619bf34d9d87)
-- 위 사진의 결과의 경우 암호화 해시를 반드시 넣을 것을 권장하는 경고 문구인데, 무시하고 그냥 실행하면 패스워드 변경 후 로그인이 안 된다.(서버에 물리적 접근으로 로그인하는 것은 가능)
-- 계정 패스워드를 변경할 수 있는 Playbook은 아래와 같이 작성한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/06a7b4d9-0e26-48d7-80cf-985946db3989)
-- 2023년 7월 12일자에 확인된 특이사항은 바꿀 패스워드를 아래와 같이 입력하면, CentOS7.x 버전 아래의 OS들에서는 특수문자가 처리되지 않는다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/3179bb6b-5644-4654-870b-a57a4235fe5d)
-
-### 2-10. 블록 재구동
-- 블록 재구동 명령을 위해서는 OS 버전별로 System Daemon을 어떤 것을 사용하고 있는지를 이해해야 한다.
-- Redhat 계열 리눅스인 CentOS의 경우 CentOS7.0을 기점으로 System Daemon이 inittab에서 systemd로 교체되면서 데몬 관리 명령어도 달라진다.
-- CentOS 6.X 이하의 OS들은 inittab 기반으로 service 명령을, CentOS 7.x 이상의 OS는 systemd 기반으로 systemctl 명령을 사용하여 블록을 관리한다.
-- 그래서 블록 버전별로 yaml을 다르게 작성하는 방법과, 조건문을 이용하여 hosts의 OS버전에 따라 service 모듈 또는 systemctl 모듈 사용을 다르게 동작하게 할 수도 있다.
-- 현재는 OS버전별로 다르게 동작하도록 service 모듈과 systemctl 모듈에 해당하는 각각의 yaml 파일을 만들어 둔 상태이다.
-- 블록 관련 작업에 service 또는 systemctl 모듈을 사용하는 이유는 Ansible의 특성인 멱등성을 보장하기 위해서이다.
-- 예를 들어, 이미 블록이 start되어 있는 상태에서 start 명령을 하달 했을 때 결과값이 Changed가 Return 된다면 그것은 멱등성을 보장하기 어려운 상태가 되므로 모듈을 사용하면 이를 방지할 수 있다.
-- systemctl 모듈을 활용한 블록 재구동 Playbook은 아래 예시와 같이 작성한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/4a3964c2-9e17-4aa1-b85b-3ba938da2ba6)
-- 실행은 아래와 같이 blockName 변수에 블록 이름 값을 부여한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/6650104c-33b9-4882-90fc-fc23e68e53f2)
-
-
-
-# 3. 기타 참고 사항
-### 3-1. 타겟팅 서버 그룹핑 원칙 및 설정 방법
-- 타겟팅 서버를 그룹핑 설정 방법은 Inventory 파일 생성 방법에 포함되어 있는 내용에 있는 인벤토리 파일 하나를 가져와 설명한다.  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/09a2e47f-de5f-401c-a745-28fb24d4f5cf)
-- 그룹핑 설정은 위와 같이 [그룹이름] 아래에 포함하고 싶은 대상 서버의 이름 또는 IP 주소를 적어주면 [xipServers]라는 그룹 아래에 n1, n2, n3라는 이름의 관리 대상 서버가 포함된다.
+2-3. Inventory 작성 시 타겟팅 서버 그룹핑 원칙 및 설정 방법
+- 타겟팅 서버를 그룹핑 설정 방법은 Inventory 파일 생성 방법에 포함되어 있는 내용에 있는 
+인벤토리 파일(xipServer.ini) 하나를 가져와 설명한다.
+ 
+- 그룹핑 설정은 위와 같이 [그룹이름] 아래에 포함하고 싶은 대상 서버의 이름 또는 IP 주소를 적어주면 [xipServers]라는 그룹 아래에 n1, n2, n3, n4, n5라는 이름의 관리 대상 서버가 포함된다.
 - 이 때 이름으로 지정하려면 무조건 /etc/hosts 파일에 해당 이름에 매칭되는 IP주소 정보가 있어야 한다.
-- 그룹을 지정하여 실행하려면 playbook에는 hosts 변수에 그룹명을 작성하고, Ad-hoc 명령에는 그룹명을 작성하면 하면 된다.
-- 플레이북 그룹 지정  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/866fd83d-2db2-4607-9fe0-17a2ebfca508)
-- Ad-hoc 명령어 그룹 지정  
-![image](https://github.com/KangSeongKwan/AnsibleResearch/assets/99636945/eb077dc5-6a61-48b1-a214-3df0f55348ad)
+- 그룹을 지정하여 실행하려면 playbook에는 hosts 변수에 그룹명을 작성한다.
+- Ad-hoc 명령에는 ansible [Target Server Node/Group명] –m [모듈명] –a [Ad-hoc 명령(모듈에 따라 달라짐)] 형식으로 작성하면 된다.
 - /etc/hosts 파일에서 관리 대상 IP의 이름을 지정할 때 어떤 서버인지 구분하기 쉽게 이름을 명확하게 지어주는 것도 관리 용이성을 추구할 수 있는 방법 중 하나이다.
 - 투입된 프로젝트 단위로 Inventory 파일을 분리해 작성하는 것 또한 좋은 방법이 될 수 있다.
 
-### 3-2. 특이사항
-- IP-PBX 제품군을 대상으로 Ansible Control을 시도하였을 때, 제품 관련 블록을 재구동하면 iptables가 자동으로 재생성되는 현상 때문에 Task의 Reslut 값을 Return 받지 못하는 현상이 발생한다.
-- 해당 내용은 IP-PBX 제품군의 GUI에서 보안 관련 작업을 실시하여 해결할 수 있다.
+2-3.1 플레이북 그룹 지정
+ 
+- hosts 변수에는 IP주소 또는 Inventory 파일 내에 정의된 모든 이름(관리 대상 개별 이름, 그룹 이름)이 할당 가능하다.
 
+2-3.2 Ad-hoc 명령어 그룹 지정
+ 
+2-4. Ansible 기본 사용법
+- 해당 절에서는 Inventory 작성 후 Ansible의 기본 사용법에 대해 기술한다.
+- Ansible 사용법에는 Ad-hoc 명령 작성과 Playbook 작성이 존재한다.
+- Ad-hoc 명령을 사용하는 예시는 아래와 같다.
+ 
+- 2-3.에 사용 형태가 기술되어 있지만, ansible [Target Server Node/Group명] –m [모듈명] –a [Ad-hoc 명령(사용하는 모듈에 따라 형태가 달라짐)] 형식으로 사용한다.
+- 위 실행 결과는 xip43 그룹에 shell 모듈을 사용하여 df –h 명령을 적용시킨 결과이다.
+- 기본 사용법 절에서는 Ad-hoc 명령어 관련 내용만 언급하고, yaml 작성법부터 Playbook 활용법및 사용 예시를 제시한다.
+
+2-4.1 Module
+- 모듈이란 프로그램을 구성하는 구성 요소로, 관련된 데이터와 함수를 하나로 묶은 단위이다.
+- Ansible에는 command, shell, copy, systemd, service, yum 등 다양한 환경관리 자동화를 위한 모듈들이 존재한다.
+- 가장 보편적으로 사용하는 모듈은 shell 모듈이며 파일 리스트 조회, 디스크 용량 및 파티션 목록 조회, 유저 패스워드 변경 등의 기본 shell 명령 동작에 사용한다.
+- 그 외 iptables 방화벽 정책 구성, 파일 송수신, 블록 재구동 같은 시스템에 큰 영향을 미칠 수 있는 작업들은 shell 모듈이 아닌 systemd, iptables 등의 모듈을 사용하여 멱등성을 보장한다.
+- 멱등성의 개념이 인지는 3-1.의 참고 사항에서 설명한다.
+2-4.2 Shell module ad-hoc Sample usecase
+- 우선 ls –l(파일 리스트 조회) 명령의 실행 결과는 아래와 같다.
+ 
+- 할당된 파티션 정보 조회(fdisk –l 명령)도 가능하며 사용 결과는 아래와 같다.
+ 
+- 지정된 user의 password를 변경할 수도 있으며 아래와 같은 예시로 사용한다.
+ 
+- 그 외 추가적인 sample usecase는 추가 제작되는 Example PPT를 참조하는 것을 권장한다.
+2-5. yaml 파일 작성
+- 2-4. 절에서 Ad-hoc 명령 작성 외에도 Playbook을 이용해 Ansible Task를 실행하는 방식이 존재한다고 언급하였다.
+- 하나의 Playbook 파일에 여러 Task를 지정할 수 있어서 한 번의 실행으로 여러 Task를 일괄 처리할 수 있다는 장점을 가지고 있어 많이 활용된다.
+- Syntax Error에 대한 자체 디버깅을 제공하지 않으며, 문법 검사를 따로 제공해주는 홈페이지 등을 활용하여야 한다.
+
+2-5.1 yaml 문법
+- Playbook의 파일 형식은 yaml이고 해당 내용에 정의되는 Tasks를 지정된 hosts에 일괄 실행할 수 있다.
+- name에 작업 이름, hosts에 해당 Playbook을 실행할 호스트 이름, tasks에 실행할 작업을 명시한다.
+- 아래는 OS Command 실행을 위한 Playbook 이다.
+ 
+- 위와 같이 작성했을 때, {{ command }} 와 같이 작성하면 command는 ansible-playbook 명령어 실행 시 –e 옵션을 통해서 값을 할당 받아야 하는 변수가 된다.
+- 실행 예시는 2-6. 절의 Sample Usecase에서 설명한다.
+2-6. ansible-playbook 명령
+- Playbook으로 작성한 작업을 실행하고 싶다면 Controller Server에서 아래 명령을 실행한다.
+- ansible-playbook [playbook_name.(yml/yaml)]
+- 값을 받아야 하는 변수가 있을 경우는 아래 문법을 따른다. 
+- ansible-playbook [playbook_name.(yml/yaml)] –e “변수명=변수값”
+- 이때 roles를 지정해 한 번의 명령으로 여러 Playbook을 동시에 실행할 수 있는데, 이는 추후에 내용을 추가할 예정이다.
+
+2-6.1 ansible-playbook Sample usecase
+- 2-5. 에서 예시로 제시한 OS Command Sample Playbook을 실행하였다.
+ 
+- 2-5.1 에서도 언급했듯이 –e 옵션을 준 다음, command 변수에 ls –l 값을 할당하여 ls -l이라는 명령어를 전달하여 실행한 결과를 return 받은 것이다.
+- yaml 파일에서 사전에 입력 받을 변수를 선언하지 않았다면, -e 옵션을 부여하지 않고 그대로 사용하면 된다.
+- 여기서 주의할 점은 Playbook으로 실행하면서 변수값에 특수문자(또는 이스케이프 문자) 또는 파이프라인을 사용할 경우 홑따옴표로 명령어 전체를 묶어줘야 한다.
+- 홑따옴표로 명령어를 묶어서 실행했을 경우
+ 
+- 홑따옴표로 묶어서 실행하지 않았을 경우
+ 
+- 위 케이스처럼 홑따옴표로 파이프라인 명령어를 포함한 전체를 묶어주지 않으면 Controller Server가 전혀 다른 결과를 Return 받는 현상이 발생한다.
+2-7. 계정 패스워드 변경
+- 계정 패스워드 변경 작업은 Ad-hoc 방식 또는 Playbook 방식을 사용할 수 있다.
+- 아래 예시는 ad-hoc 방식으로 user 모듈을 사용하여 root계정의 패스워드를 변경하 것이다.
+ 
+- 유저 이름, 패스워드 상시 변경 여부, 패스워드, hash 방식 등을 지정해야 명령어가 동작한다.
+- 계정 패스워드를 변경할 수 있는 Playbook은 아래와 같이 작성한다.
+ 
+- 실행은 아래와 2-6.1의 sample usecase와 유사하게 ansible-playbook 명령으로 실행한다.
+ 
+2-8. Debug Message
+- 위에서 보았던 실행 결과의 문제점은 어느 서버에서 어떤 파일을 전송 하였고 어떤 명령을 실행했는지 구체적인 것을 알 수 없다.
+- Playbook에서 debug 모듈을 사용하면 메시지를 표기할 수 있고, 표기 방식은 두 가지가 있다.
+
+2-8.1 register 모듈을 불러와 debug 모듈에 변수로 불러오는 방식
+- 하나의 task 단위에 register 모듈 사용하면 해당 task의 실행 과정을 확인할 수 있다.
+ 
+- 위는 db_backup yaml 파일의 일부를 발췌한 것이며, 수정 사항으로는 task에 register 모듈을 사용하여 결과 변수를 등록하고, debug 모듈에서 이를 사용하는 내용을 추가한 것이다.
+- 실행 결과는 다음과 같이 모든 객체들의 값을 출력한다.
+ 
+2-8.2 debug 모듈의 msg 모듈을 사용하여 직접 메시지를 지정하는 방식
+- task에 register 모듈을 사용하는 방식이 아닌, debug 모듈 아래에 msg를 직접 작성하는 방식이다.
+ 
+- 실행 결과는 다음과 같이 msg에 지정된 메시지 내용만 출력한다.
+ 
+- 가독성을 높여 사용할 수 있으나, 매번 세세히 정의해야 하는 번거로움이 있다.
+2-8.3 stdout_lines를 활용한 깔끔한 디버깅 메시지 작성
+- Playbook 실행 시 register 모듈을 사용하면 debug 메시지를 확인할 수 있다.
+- 그 중 stdout_lines 객체를 불러오면 명령어 실행 결과를 디버깅 메시지로 확인할 수 있다.
+- Playbook은 아래와 같이 register 모듈의 값을 저장하는 변수에 stdout_lines 객체를 덧붙여 호출하면 된다.
+ 
+- stdout_lines 객체는 아래와 같이 명령어 실행 결과를 리턴 한다.
+ 
+- shell 모듈의 register는 stdout_lines를 지원하지만, systemd등의 모듈에서는 stdout_lines 객체를 지원하지 않는다.
+- systemd 모듈의 경우 아래와 같이 changed, failed, name, state, status 객체를 지원한다.
+ 
+2-9. db_backup
+- sftp 사용하여 백업 스크립트를 Target Server에 업로드 하고 Target Server에서 스크립트 실행 후Controller Server에 DB백업한 파일을 업로드 하는 방식으로 동작한다.
+- 스크립트 및 Playbook은 아래와 같이 구현한다.
+ 
+
+ 
+- 해당 Playbook을 실행하면 다음과 같이 정상적으로 결과가 잘 나오는 것을 볼 수 있다.
+ 
+- Create a script directory if it does not exist로 정의된 Task는 디렉터리가 존재하지 않는다면 디렉터리를 생성하며 Changed를 Return하고 존재할 경우 OK를 Return하며 다음 Task로 전환한다.
+- 정상 백업이 완료되면 Controller Server에 다음과 같이 백업이 올라와 있는 것을 확인할 수 있다.
+ 
+2-9. patch upload
+- 패치를 업로드 하는 방식은 db_backup 스크립트의 방식과는 다르게 Target Server가 Controller Server의 특정 디렉터리에서 패치 파일을 get으로 받아오는 방식이다.
+- 스크립트는 아래와 같이 구현한다.
+ 
+- 주의사항은 패치파일 이름의 날짜가 스크립트 실행 시점의 날짜와 일치해야 한다는 점이다.
+- Controller Server에는 patch 파일을 수동으로 업로드 해야 한다.(FileZila 사용)
+- yaml 실행 전에 반드시 Controller Server의 /SI/PKG/patch 디렉터리에 패치파일이 존재하는지 확인해줘야 한다.
+- yaml은 아래와 같이 작성한다.
+ 
+- 실행하면 다음과 같이 출력되어야 정상 동작한 것이다.
+ 
+- 타겟 서버 중 하나를 확인하여 patch파일이 잘 올라 갔는지 확인한다.
+ 
+
+2-11. 블록 재구동
+- 데몬 관리를 위해서는 OS 버전별로 어떤 System Daemon을 사용하고 있는지 이해해야 한다.
+- Redhat 계열 리눅스인 CentOS의 경우 CentOS 7을 기점으로 System Daemon이 inittab에서 systemd로 교체되면서 데몬 관리 명령어도 달라진다.
+- CentOS 6.X 이하의 OS들은 inittab 기반으로 service 명령을, CentOS 7.x 이상의 OS는 systemd 기반으로 systemctl 명령을 사용하여 블록을 관리한다.
+- systemd 모듈을 활용한 블록 재구동 Playbook은 아래 예시와 같이 작성한다.
+ 
+- systemd 모듈 활용한 블록 재구동 예시는 아래와 같다.
+ 
+- service 모듈을 활용한 블록 재구동 Playbook은 아래 예시와 같이 작성한다.
+ 
+
+- service 모듈 활용한 블록 재구동 예시는 아래와 같다.
+ 
+
+2-12. Packet Capture
+- 간혹 서비스 운용 중에 이슈가 발생하여 패킷 내용을 확인할 필요가 있을 때 사용한다.
+- 패킷은 호스트에서 네트워크 및 서비스가 주고받는 메시지의 일종이다.
+- Playbook은 아래 예시와 같이 작성한다.
+ 
+- 동작은 아래와 같이 패킷을 Target Server에서 캡쳐 및 파일로 저장하고 해당 파일을 Controller 서버로 저장한다.
+ 
+- 주의 할 것은 노란색 박스의 동작에서 Ctrl + C로 pause 모듈을 중지 시킨 이후에
+반드시 C를 입력해야 나머지 tcpdump 프로세스 종료 및 파일 저장이 정상적으로 이루어 진다.
+
+- A를 입력할 경우 아래와 같이 Playbook 실행 자체가 중지된다.
+ 
+- 또한 아래와 같이 Target Server의 프로세스가 살아 있는 채로 계속 동작한다.
+ 
+3. 기타 참고 사항
+3-1. 참고사항
+3-1.1 멱등성
+- 전산학 또는 수학에서 사용하는 용어이다.
+- 연산을 여러 번 적용 하더라도 결과가 달라지지 않는 성질 또는 연산을 
+여러 번 반복 하더라도 한 번만 수행된 것과 같은 성질을 의미한다.
+- 메소드가 여러 번 실행되어도 결과는 같으므로 안전하게 사용할 수 있다는 의미이다.
+- 변화가 발생하지 않는 동일한 Task를 실행하였을 때 
+결과가 항상 Changed로 Return 되는 것은 Ansible 사용 취지에 적합하지 않다.
+- 디렉터리 생성으로 테스트했을 때 적절한 모듈을 사용한 ad-hoc 명령은 다음과 같이 동작한다.
+ 
+- 위와 같이 첫 번째 Task에서는 Changed가 true, 두번째 task에서는 false를 Return 한다.
+- 그러나 file 모듈이 아닌 shell 모듈을 사용하여 디렉터리를 생성할 경우 아래 경고가 발생하며 계속 changed를 return한다.
+ 
+- System 관련 Task를 실행할 때 해당 부분이 Ansible을 상용에서 운영함에 있어서 큰 문제가 될 수 있기 때문에 반드시 보장되어야 한다.
+
+3-2. 특이사항
+- 특정 제품군을 대상으로 서비스 블록을 재구동 하면 iptables가 자동으로 재구성되는 현상 때문에 Task의 Result 값을 Return 받지 못하는 현상이 발생(Access-Control-List 항목에 Controller Server IP를 ACCEPT 정책으로 추가하여 해결)
+- Playbook으로 계정 Password 변경 시 아래와 같이 사용하면 CentOS7.x 아래 버전의 OS에서는 Password가 인식이 제대로 안 되는 현상이 있음
+ 
